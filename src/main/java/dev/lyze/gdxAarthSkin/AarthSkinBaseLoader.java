@@ -3,15 +3,32 @@ package dev.lyze.gdxAarthSkin;
 import com.badlogic.gdx.assets.AssetLoaderParameters;
 import com.badlogic.gdx.assets.loaders.AsynchronousAssetLoader;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.GridPoint2;
 import lombok.var;
 
+import java.util.StringTokenizer;
+
 public abstract class AarthSkinBaseLoader<TFormat, TParameters extends AssetLoaderParameters<TFormat>> extends AsynchronousAssetLoader<TFormat, TParameters> {
     public AarthSkinBaseLoader(FileHandleResolver resolver) {
         super(resolver);
+    }
+
+    protected static FileHandle getRelativeFileHandle(FileHandle file, String path) {
+        var tokenizer = new StringTokenizer(path, "\\/");
+
+        var result = file.parent();
+
+        while (tokenizer.hasMoreElements()) {
+            var token = tokenizer.nextToken();
+
+            result = token.equals("..") ? result.parent() : result.child(token);
+        }
+
+        return result;
     }
 
     protected Pixmap convert(Texture texture, Texture intermediate, Texture map) {

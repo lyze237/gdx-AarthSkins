@@ -10,10 +10,11 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import dev.lyze.gdxAarthSkin.AarthSkinTextureLoader;
 import gdxAarthSkins.lwjgl.LibgdxLwjglUnitTest;
 import lombok.var;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-public class TextureExampleTest extends LibgdxLwjglUnitTest {
+public class TextureTests extends LibgdxLwjglUnitTest {
     private SpriteBatch batch;
     private FitViewport viewport;
 
@@ -30,13 +31,23 @@ public class TextureExampleTest extends LibgdxLwjglUnitTest {
     @Test
     @Tag("lwjgl")
     public void test() {
-        Gdx.app.postRunnable(() -> {
+        load("Test.aarth");
+    }
+
+    @Test
+    @Tag("lwjgl")
+    public void relativeFolderPathTest() {
+        load("relative/test/Test.aarth");
+    }
+
+    private void load(String file) {
+        Gdx.app.postRunnable(() -> Assertions.assertDoesNotThrow(() -> {
             var assMan = new AssetManager();
             assMan.setLoader(Texture.class, "aarth", new AarthSkinTextureLoader());
-            assMan.load("Test.aarth", Texture.class);
+            assMan.load(file, Texture.class);
             assMan.finishLoading();
-            texture = assMan.get("Test.aarth", Texture.class);
-        });
+            texture = assMan.get(file, Texture.class);
+        }));
     }
 
     @Override

@@ -30,9 +30,9 @@ public class AarthSkinTextureLoader extends AarthSkinBaseLoader<Texture, AarthSk
         if (content.length != 3)
             throw new GdxRuntimeException(new IllegalArgumentException("Aarth skin file should contain two lines: \nsource\nintermediate\nmap"));
 
-        textureFile = content[0].trim();
-        intermediateFile = content[1].trim();
-        mapFile = content[2].trim();
+        textureFile = getRelativeFileHandle(file, content[0].trim()).path();
+        intermediateFile = getRelativeFileHandle(file, content[1].trim()).path();
+        mapFile = getRelativeFileHandle(file, content[2].trim()).path();
     }
 
     @Override
@@ -54,9 +54,9 @@ public class AarthSkinTextureLoader extends AarthSkinBaseLoader<Texture, AarthSk
         if (content.length != 3)
             throw new GdxRuntimeException(new IllegalArgumentException("Aarth skin file should contain two lines: \nsource\nintermediate\nmap"));
 
-        descriptors.add(new AssetDescriptor<>(resolve(content[0].trim()), Texture.class, parameter != null ? parameter.textureParameter : null));
-        descriptors.add(new AssetDescriptor<>(resolve(content[1].trim()), Texture.class, parameter != null ? parameter.intermediateTextureParameter : null));
-        descriptors.add(new AssetDescriptor<>(resolve(content[2].trim()), Texture.class, parameter != null ? parameter.mapTextureParameter : null));
+        descriptors.add(new AssetDescriptor<>(getRelativeFileHandle(file, content[0].trim()), Texture.class, parameter != null ? parameter.textureParameter : null));
+        descriptors.add(new AssetDescriptor<>(getRelativeFileHandle(file, content[1].trim()), Texture.class, parameter != null ? parameter.intermediateTextureParameter : null));
+        descriptors.add(new AssetDescriptor<>(getRelativeFileHandle(file, content[2].trim()), Texture.class, parameter != null ? parameter.mapTextureParameter : null));
 
         return descriptors;
     }

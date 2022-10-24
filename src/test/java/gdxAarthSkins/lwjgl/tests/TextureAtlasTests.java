@@ -11,10 +11,11 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import dev.lyze.gdxAarthSkin.AarthSkinTextureAtlasLoader;
 import gdxAarthSkins.lwjgl.LibgdxLwjglUnitTest;
 import lombok.var;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-public class TextureAtlasExampleTest extends LibgdxLwjglUnitTest {
+public class TextureAtlasTests extends LibgdxLwjglUnitTest {
     private SpriteBatch batch;
     private FitViewport viewport;
 
@@ -32,16 +33,26 @@ public class TextureAtlasExampleTest extends LibgdxLwjglUnitTest {
     @Test
     @Tag("lwjgl")
     public void test() {
-        Gdx.app.postRunnable(() -> {
+        load("Sprite.aarth", "Sprite");
+    }
+
+    @Test
+    @Tag("lwjgl")
+    public void relativeFolderPathTest() {
+        load("relative/test/Sprite.aarth", "Sprite");
+    }
+
+    private void load(String fileName, String regionName) {
+        Gdx.app.postRunnable(() -> Assertions.assertDoesNotThrow(() -> {
             var assMan = new AssetManager();
             assMan.setLoader(TextureAtlas.class, "aarth", new AarthSkinTextureAtlasLoader());
-            assMan.load("Sprite.aarth", TextureAtlas.class);
+            assMan.load(fileName, TextureAtlas.class);
             assMan.finishLoading();
 
-            var atlas = assMan.get("Sprite.aarth", TextureAtlas.class);
-            animation = new Animation<>(0.1f, atlas.findRegions("Sprite"), Animation.PlayMode.LOOP);
+            var atlas = assMan.get(fileName, TextureAtlas.class);
+            animation = new Animation<>(0.1f, atlas.findRegions(regionName), Animation.PlayMode.LOOP);
             animationTime = 0;
-        });
+        }));
     }
 
     @Override

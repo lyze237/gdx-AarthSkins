@@ -47,7 +47,7 @@ public class AarthSkinTextureAtlasAssetLoader extends AarthSkinBaseAssetLoader<T
         var textureMap = new ObjectMap<Texture, Texture>();
 
         for (var texture : atlas.getTextures()) {
-            var finalPixmap = convert(texture, intermediate, map, parameter != null && parameter.keepAlphaFromSource);
+            var finalPixmap = convert(texture, intermediate, map);
 
             textureMap.put(texture, new Texture(finalPixmap));
         }
@@ -78,8 +78,6 @@ public class AarthSkinTextureAtlasAssetLoader extends AarthSkinBaseAssetLoader<T
 
     @Data
     public static class AarthSkinParameter extends AssetLoaderParameters<TextureAtlas> {
-        private boolean keepAlphaFromSource;
-
         private TextureLoader.TextureParameter intermediateTextureParameter, mapTextureParameter;
         private TextureAtlasLoader.TextureAtlasParameter textureAtlasParameter;
     }

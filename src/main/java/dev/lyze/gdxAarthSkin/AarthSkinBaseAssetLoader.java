@@ -14,7 +14,7 @@ public abstract class AarthSkinBaseAssetLoader<TFormat, TParameters extends Asse
         super(resolver);
     }
 
-    protected Pixmap convert(Texture texture, Texture intermediate, Texture map, boolean keepAlphaFromSource) {
+    protected Pixmap convert(Texture texture, Texture intermediate, Texture map) {
         if (!texture.getTextureData().isPrepared())
             texture.getTextureData().prepare();
 
@@ -29,7 +29,7 @@ public abstract class AarthSkinBaseAssetLoader<TFormat, TParameters extends Asse
         var mapPixmap = map.getTextureData().consumePixmap();
         var secondStepPixmap = convertToIntermediate(texturePixmap, intermediatePixmap);
 
-        return convertToFinal(secondStepPixmap, mapPixmap, keepAlphaFromSource);
+        return convertToFinal(secondStepPixmap, mapPixmap);
     }
 
     protected Pixmap convertToIntermediate(Pixmap texturePixmap, Pixmap intermediatePixmap) {
@@ -67,7 +67,7 @@ public abstract class AarthSkinBaseAssetLoader<TFormat, TParameters extends Asse
         return null;
     }
 
-    protected Pixmap convertToFinal(Pixmap texturePixmap, Pixmap mapPixmap, boolean keepAlphaFromSource) {
+    protected Pixmap convertToFinal(Pixmap texturePixmap, Pixmap mapPixmap) {
         var finalPixmap = new Pixmap(texturePixmap.getWidth(), texturePixmap.getHeight(), texturePixmap.getFormat());
 
         for (int x = 0; x < texturePixmap.getWidth(); x++) {
@@ -85,8 +85,7 @@ public abstract class AarthSkinBaseAssetLoader<TFormat, TParameters extends Asse
                 var r = ((mapColor & 0xff000000) >>> 24) / 255f;
                 var g = ((mapColor & 0x00ff0000) >>> 16) / 255f;
                 var b = ((mapColor & 0x0000ff00) >>> 8) / 255f;
-
-                var a = ((keepAlphaFromSource ? color : mapColor) & 0x000000ff) / 255f;
+                var a = ((mapColor) & 0x000000ff) / 255f;
 
                 finalPixmap.setColor(r, g, b, a);
                 finalPixmap.drawPixel(x, y);

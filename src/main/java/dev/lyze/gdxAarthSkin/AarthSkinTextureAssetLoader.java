@@ -41,7 +41,7 @@ public class AarthSkinTextureAssetLoader extends AarthSkinBaseAssetLoader<Textur
         var map = manager.get(mapFile, Texture.class);
         var intermediate = manager.get(intermediateFile, Texture.class);
 
-        var finalPixmap = convert(texture, intermediate, map, parameter != null && parameter.keepAlphaFromSource);
+        var finalPixmap = convert(texture, intermediate, map);
 
         return new Texture(finalPixmap);
     }
@@ -63,8 +63,6 @@ public class AarthSkinTextureAssetLoader extends AarthSkinBaseAssetLoader<Textur
 
     @Data
     public static class AarthSkinParameter extends AssetLoaderParameters<Texture> {
-        private boolean keepAlphaFromSource;
-
         private TextureLoader.TextureParameter textureParameter, intermediateTextureParameter, mapTextureParameter;
     }
 }

@@ -11,11 +11,72 @@ A libgdx implemented of aartificial's way on loading textures
 
 [![Youtube Explanation](https://img.youtube.com/vi/HsOKwUwL1bE/0.jpg)](https://www.youtube.com/watch?v=HsOKwUwL1bE)
 
-# Example
-
 ![](images/example.png)
 
 | Source file | Map files | Result |
+
+# Example
+
+Create a file ending in `.aarth`. (For example: `Test.aarth`) and fill it with the following lines:
+1. path to source file
+2. path to intermediate map file
+3. path to actual map file
+
+Examples see here: https://github.com/lyze237/gdx-AarthSkins/tree/main/src/test/resources
+
+
+```java
+public class Example extends ApplicationAdapter {
+  private Viewport viewport = new XXXViewport(xxx, xxx);
+  private SpriteBatch batch;
+  
+  private Texture texture;
+  private Animation<TextureAtlas.AtlasRegion> animation;
+
+  public void create() {
+      batch = new SpriteBatch();
+      
+      // https://libgdx.com/wiki/managing-your-assets
+      // Loading Aarth Skin files is only implemented via an asset manager
+      var assMan = new AssetManager();
+      
+      // Register the aarth skin texture loader
+      assMan.setLoader(Texture.class, "aarth", new AarthSkinTextureLoader());
+      // Tell the asset manager to load the file
+      assMan.load("Test.aarth", Texture.class);
+      // Tell the asset manager to finish loading everything
+      assMan.finishLoading();
+      
+      // Get the generated texture
+      texture = assMan.get("Test.aarth", Texture.class);
+      
+      // Alternatively loading a texture atlas:
+      assMan.setLoader(TextureAtlas.class, "aarth", new AarthSkinTextureAtlasLoader());
+      assMan.load("Sprite.aarth", TextureAtlas.class);
+      assMan.finishLoading();
+
+      var atlas = assMan.get("Sprite.aarth", TextureAtlas.class);
+      animation = new Animation<>(0.1f, atlas.findRegions("Sprite"), Animation.PlayMode.LOOP);
+  }
+
+  public void render() {
+    ScreenUtils.clear(Color.TEAL);
+
+    viewport.apply();
+
+    batch.setProjectionMatrix(viewport.getCamera().combined);
+
+    batch.begin();
+    batch.draw(texture, 0, 0);
+    batch.end();
+  }
+
+  @Override
+  public void resize(int width, int height) {
+    viewport.update(width, height, true);
+  }
+}
+```
 
 # Installation
 

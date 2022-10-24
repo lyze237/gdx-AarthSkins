@@ -9,8 +9,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.GridPoint2;
 import lombok.var;
 
-public abstract class AarthSkinBaseAssetLoader<TFormat, TParameters extends AssetLoaderParameters<TFormat>> extends AsynchronousAssetLoader<TFormat, TParameters> {
-    public AarthSkinBaseAssetLoader(FileHandleResolver resolver) {
+public abstract class AarthSkinBaseLoader<TFormat, TParameters extends AssetLoaderParameters<TFormat>> extends AsynchronousAssetLoader<TFormat, TParameters> {
+    public AarthSkinBaseLoader(FileHandleResolver resolver) {
         super(resolver);
     }
 

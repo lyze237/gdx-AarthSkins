@@ -4,26 +4,23 @@ import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetLoaderParameters;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
-import com.badlogic.gdx.assets.loaders.TextureAtlasLoader;
 import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.badlogic.gdx.utils.ObjectMap;
 import lombok.Data;
 import lombok.var;
 
-public class AarthSkinTextureAtlasAssetLoader extends AarthSkinBaseAssetLoader<TextureAtlas, AarthSkinTextureAtlasAssetLoader.AarthSkinParameter> {
+public class AarthSkinTextureLoader extends AarthSkinBaseLoader<Texture, AarthSkinTextureLoader.AarthSkinParameter> {
     private String textureFile, intermediateFile, mapFile;
 
-    public AarthSkinTextureAtlasAssetLoader() {
+    public AarthSkinTextureLoader() {
         this(new InternalFileHandleResolver());
     }
 
-    public AarthSkinTextureAtlasAssetLoader(FileHandleResolver resolver) {
+    public AarthSkinTextureLoader(FileHandleResolver resolver) {
         super(resolver);
     }
 
@@ -39,26 +36,14 @@ public class AarthSkinTextureAtlasAssetLoader extends AarthSkinBaseAssetLoader<T
     }
 
     @Override
-    public TextureAtlas loadSync(AssetManager manager, String fileName, FileHandle file, AarthSkinParameter parameter) {
-        var atlas = manager.get(textureFile, TextureAtlas.class);
+    public Texture loadSync(AssetManager manager, String fileName, FileHandle file, AarthSkinParameter parameter) {
+        var texture = manager.get(textureFile, Texture.class);
         var map = manager.get(mapFile, Texture.class);
         var intermediate = manager.get(intermediateFile, Texture.class);
 
-        var textureMap = new ObjectMap<Texture, Texture>();
+        var finalPixmap = convert(texture, intermediate, map);
 
-        for (var texture : atlas.getTextures()) {
-            var finalPixmap = convert(texture, intermediate, map);
-
-            textureMap.put(texture, new Texture(finalPixmap));
-        }
-
-        for (var region : atlas.getRegions()) {
-            var newTexture = textureMap.get(region.getTexture());
-
-            region.setTexture(newTexture);
-        }
-
-        return atlas;
+        return new Texture(finalPixmap);
     }
 
     @Override
@@ -69,7 +54,7 @@ public class AarthSkinTextureAtlasAssetLoader extends AarthSkinBaseAssetLoader<T
         if (content.length != 3)
             throw new GdxRuntimeException(new IllegalArgumentException("Aarth skin file should contain two lines: \nsource\nintermediate\nmap"));
 
-        descriptors.add(new AssetDescriptor<>(resolve(content[0].trim()), TextureAtlas.class, parameter != null ? parameter.textureAtlasParameter : null));
+        descriptors.add(new AssetDescriptor<>(resolve(content[0].trim()), Texture.class, parameter != null ? parameter.textureParameter : null));
         descriptors.add(new AssetDescriptor<>(resolve(content[1].trim()), Texture.class, parameter != null ? parameter.intermediateTextureParameter : null));
         descriptors.add(new AssetDescriptor<>(resolve(content[2].trim()), Texture.class, parameter != null ? parameter.mapTextureParameter : null));
 
@@ -77,8 +62,7 @@ public class AarthSkinTextureAtlasAssetLoader extends AarthSkinBaseAssetLoader<T
     }
 
     @Data
-    public static class AarthSkinParameter extends AssetLoaderParameters<TextureAtlas> {
-        private TextureLoader.TextureParameter intermediateTextureParameter, mapTextureParameter;
-        private TextureAtlasLoader.TextureAtlasParameter textureAtlasParameter;
+    public static class AarthSkinParameter extends AssetLoaderParameters<Texture> {
+        private TextureLoader.TextureParameter textureParameter, intermediateTextureParameter, mapTextureParameter;
     }
 }

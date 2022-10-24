@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import dev.lyze.gdxAarthSkin.AarthSkinTextureAssetLoader;
+import dev.lyze.gdxAarthSkin.AarthSkinTextureLoader;
 import gdxAarthSkins.lwjgl.LibgdxLwjglUnitTest;
 import lombok.var;
 import org.junit.jupiter.api.Tag;
@@ -32,10 +32,10 @@ public class TextureExampleTest extends LibgdxLwjglUnitTest {
     public void test() {
         Gdx.app.postRunnable(() -> {
             var assMan = new AssetManager();
-            assMan.setLoader(Texture.class, "aarth", new AarthSkinTextureAssetLoader());
-            assMan.load("test.aarth", Texture.class);
+            assMan.setLoader(Texture.class, "aarth", new AarthSkinTextureLoader());
+            assMan.load("Test.aarth", Texture.class);
             assMan.finishLoading();
-            texture = assMan.get("test.aarth", Texture.class);
+            texture = assMan.get("Test.aarth", Texture.class);
         });
     }
 

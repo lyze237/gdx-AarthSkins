@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import dev.lyze.gdxAarthSkin.AarthSkinTextureAtlasAssetLoader;
+import dev.lyze.gdxAarthSkin.AarthSkinTextureAtlasLoader;
 import gdxAarthSkins.lwjgl.LibgdxLwjglUnitTest;
 import lombok.var;
 import org.junit.jupiter.api.Tag;
@@ -34,7 +34,7 @@ public class TextureAtlasExampleTest extends LibgdxLwjglUnitTest {
     public void test() {
         Gdx.app.postRunnable(() -> {
             var assMan = new AssetManager();
-            assMan.setLoader(TextureAtlas.class, "aarth", new AarthSkinTextureAtlasAssetLoader());
+            assMan.setLoader(TextureAtlas.class, "aarth", new AarthSkinTextureAtlasLoader());
             assMan.load("Sprite.aarth", TextureAtlas.class);
             assMan.finishLoading();
 

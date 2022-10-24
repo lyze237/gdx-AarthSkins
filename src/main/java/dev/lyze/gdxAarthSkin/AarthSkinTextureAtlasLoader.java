@@ -16,6 +16,8 @@ import com.badlogic.gdx.utils.ObjectMap;
 import lombok.Data;
 import lombok.var;
 
+import javax.swing.plaf.TextUI;
+
 public class AarthSkinTextureAtlasLoader extends AarthSkinBaseLoader<TextureAtlas, AarthSkinTextureAtlasLoader.AarthSkinParameter> {
     private String sourceFile, mapFile, lookupFile;
 
@@ -44,7 +46,12 @@ public class AarthSkinTextureAtlasLoader extends AarthSkinBaseLoader<TextureAtla
         var map = manager.get(mapFile, Texture.class);
         var lookup = manager.get(lookupFile, Texture.class);
 
-        var textures = new ObjectMap<Texture, Texture>();
+
+        return convert(source, map, lookup);
+    }
+
+    public TextureAtlas convert(TextureAtlas source, Texture map, Texture lookup) {
+         var textures = new ObjectMap<Texture, Texture>();
 
         for (var texture : source.getTextures())
             textures.put(texture, new Texture(convert(texture, map, lookup)));

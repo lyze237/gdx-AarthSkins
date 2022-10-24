@@ -3,12 +3,14 @@ package gdxAarthSkins.lwjgl.tests;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import dev.lyze.gdxAarthSkin.AarthSkinTextureAtlasLoader;
+import dev.lyze.gdxAarthSkin.AarthSkinTextureLoader;
 import gdxAarthSkins.lwjgl.LibgdxLwjglUnitTest;
 import lombok.var;
 import org.junit.jupiter.api.Assertions;
@@ -40,6 +42,17 @@ public class TextureAtlasTests extends LibgdxLwjglUnitTest {
     @Tag("lwjgl")
     public void relativeFolderPathTest() {
         load("relative/test/Sprite.aarth", "Sprite");
+    }
+
+    @Test
+    @Tag("lwjgl")
+    public void loadWithoutAssetManager() {
+        Gdx.app.postRunnable(() -> Assertions.assertDoesNotThrow(() -> {
+            var atlas = new AarthSkinTextureAtlasLoader().convert(new TextureAtlas("Sprite.atlas"), new Texture("map.png"), new Texture("lookup.png"));
+
+            animation = new Animation<>(0.1f, atlas.findRegions("Sprite"), Animation.PlayMode.LOOP);
+            animationTime = 0;
+        }));
     }
 
     private void load(String fileName, String regionName) {

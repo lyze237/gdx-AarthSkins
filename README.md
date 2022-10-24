@@ -24,57 +24,67 @@ Create a file ending in `.aarth`. (For example: `Test.aarth`) and fill it with t
 
 Examples see here: https://github.com/lyze237/gdx-AarthSkins/tree/main/src/test/resources
 
-
 ```java
 public class Example extends ApplicationAdapter {
-  private Viewport viewport = new XXXViewport(xxx, xxx);
-  private SpriteBatch batch;
-  
-  private Texture texture;
-  private Animation<TextureAtlas.AtlasRegion> animation;
+    private Viewport viewport = new XXXViewport(xxx, xxx);
+    private SpriteBatch batch;
 
-  public void create() {
-      batch = new SpriteBatch();
-      
-      // https://libgdx.com/wiki/managing-your-assets
-      // Loading Aarth Skin files is only implemented via an asset manager
-      var assMan = new AssetManager();
-      
-      // Register the aarth skin texture loader
-      assMan.setLoader(Texture.class, "aarth", new AarthSkinTextureLoader());
-      // Tell the asset manager to load the file
-      assMan.load("Test.aarth", Texture.class);
-      // Tell the asset manager to finish loading everything
-      assMan.finishLoading();
-      
-      // Get the generated texture
-      texture = assMan.get("Test.aarth", Texture.class);
-      
-      // Alternatively loading a texture atlas:
-      assMan.setLoader(TextureAtlas.class, "aarth", new AarthSkinTextureAtlasLoader());
-      assMan.load("Sprite.aarth", TextureAtlas.class);
-      assMan.finishLoading();
+    private Texture texture;
+    private Animation<TextureAtlas.AtlasRegion> animation;
 
-      var atlas = assMan.get("Sprite.aarth", TextureAtlas.class);
-      animation = new Animation<>(0.1f, atlas.findRegions("Sprite"), Animation.PlayMode.LOOP);
-  }
+    public void create() {
+        batch = new SpriteBatch();
 
-  public void render() {
-    ScreenUtils.clear(Color.TEAL);
+        // Generate the texture manually
+        var aarthSkinTextureLoader = new AarthSkinTextureLoader();
+        texture = new Texture(aarthSkinTextureLoader.convert(new Texture("source.png"), new Texture("map.png"), new Texture("lookup.png")));
+        
+        // Generate the atlas manually
+        var aarthSkinTextureAtlasLoader = new AarthSkinTextureAtlasLoader();
+        var atlas = aarthSkinTextureAtlasLoader.convert(new TextureAtlas("Sprite.atlas"), new Texture("map.png"), new Texture("lookup.png"));
+        animation = new Animation<>(0.1f, atlas.findRegions("Sprite"), Animation.PlayMode.LOOP);
 
-    viewport.apply();
+        
+        // Or generate it via an asset manager
+        // https://libgdx.com/wiki/managing-your-assets
+        var assMan = new AssetManager();
 
-    batch.setProjectionMatrix(viewport.getCamera().combined);
+        // Register the aarth skin texture loader
+        assMan.setLoader(Texture.class, "aarth", new AarthSkinTextureLoader());
+        // Tell the asset manager to load the file
+        assMan.load("Test.aarth", Texture.class);
+        // Tell the asset manager to finish loading everything
+        assMan.finishLoading();
 
-    batch.begin();
-    batch.draw(texture, 0, 0);
-    batch.end();
-  }
+        // Get the generated texture
+        texture = assMan.get("Test.aarth", Texture.class);
 
-  @Override
-  public void resize(int width, int height) {
-    viewport.update(width, height, true);
-  }
+
+        // Alternatively load a texture atlas
+        assMan.setLoader(TextureAtlas.class, "aarth", new AarthSkinTextureAtlasLoader());
+        assMan.load("Sprite.aarth", TextureAtlas.class);
+        assMan.finishLoading();
+
+        var atlas = assMan.get("Sprite.aarth", TextureAtlas.class);
+        animation = new Animation<>(0.1f, atlas.findRegions("Sprite"), Animation.PlayMode.LOOP);
+    }
+
+    public void render() {
+        ScreenUtils.clear(Color.TEAL);
+
+        viewport.apply();
+
+        batch.setProjectionMatrix(viewport.getCamera().combined);
+
+        batch.begin();
+        batch.draw(texture, 0, 0);
+        batch.end();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height, true);
+    }
 }
 ```
 

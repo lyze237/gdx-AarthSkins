@@ -40,6 +40,14 @@ public class TextureTests extends LibgdxLwjglUnitTest {
         load("relative/test/Test.aarth");
     }
 
+    @Test
+    @Tag("lwjgl")
+    public void loadWithoutAssetManager() {
+        Gdx.app.postRunnable(() -> Assertions.assertDoesNotThrow(() -> {
+            texture = new Texture(new AarthSkinTextureLoader().convert(new Texture("source.png"), new Texture("map.png"), new Texture("lookup.png")));
+        }));
+    }
+
     private void load(String file) {
         Gdx.app.postRunnable(() -> Assertions.assertDoesNotThrow(() -> {
             var assMan = new AssetManager();

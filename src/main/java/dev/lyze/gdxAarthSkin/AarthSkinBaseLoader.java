@@ -31,7 +31,7 @@ public abstract class AarthSkinBaseLoader<TFormat, TParameters extends AssetLoad
         return result;
     }
 
-    protected Pixmap convert(Texture texture, Texture map, Texture lookup) {
+    public Pixmap convert(Texture texture, Texture map, Texture lookup) {
         if (!texture.getTextureData().isPrepared())
             texture.getTextureData().prepare();
 

@@ -1,0 +1,24 @@
+spotless {
+    lineEndings 'UNIX'
+
+    format 'misc', {
+        target '*.gradle', '*.md', '.gitignore'
+
+        trimTrailingWhitespace()
+        indentWithSpaces(4)
+        endWithNewline()
+    }
+
+    java {
+        importOrder()
+
+        indentWithSpaces(4)
+
+        eclipse().configFile('eclipse-formatter.xml')
+    }
+
+    groovyGradle {
+        target '*.gradle'
+        greclipse().configFile('eclipse-formatter.xml')
+    }
+}

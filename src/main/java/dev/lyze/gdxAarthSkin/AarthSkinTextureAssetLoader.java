@@ -9,14 +9,16 @@ import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import lombok.Data;
 import lombok.var;
 
 public class AarthSkinTextureAssetLoader extends AsynchronousAssetLoader<Texture, AarthSkinTextureAssetLoader.AarthSkinParameter> {
-    private String mapFile, textureFile;
+    private String textureFile, intermediateFile, mapFile;
 
     public AarthSkinTextureAssetLoader() {
         this(new InternalFileHandleResolver());
@@ -29,26 +31,75 @@ public class AarthSkinTextureAssetLoader extends AsynchronousAssetLoader<Texture
     @Override
     public void loadAsync(AssetManager manager, String fileName, FileHandle file, AarthSkinParameter parameter) {
         var content = file.readString().split("\n");
-        if (content.length != 2)
-            throw new GdxRuntimeException(new IllegalArgumentException("Aarth skin file should contain two lines: \nmap\ntexture"));
+        if (content.length != 3)
+            throw new GdxRuntimeException(new IllegalArgumentException("Aarth skin file should contain two lines: \nsource\nintermediate\nmap"));
 
-        mapFile = content[0].trim();
-        textureFile = content[1].trim();
+        textureFile = content[0].trim();
+        intermediateFile = content[1].trim();
+        mapFile = content[2].trim();
     }
 
     @Override
     public Texture loadSync(AssetManager manager, String fileName, FileHandle file, AarthSkinParameter parameter) {
-        var map = manager.get(mapFile, Texture.class);
         var texture = manager.get(textureFile, Texture.class);
-
-        if (!map.getTextureData().isPrepared())
-            map.getTextureData().prepare();
+        var map = manager.get(mapFile, Texture.class);
+        var intermediate = manager.get(intermediateFile, Texture.class);
 
         if (!texture.getTextureData().isPrepared())
             texture.getTextureData().prepare();
 
-        var mapPixmap = map.getTextureData().consumePixmap();
+        if (!intermediate.getTextureData().isPrepared())
+            intermediate.getTextureData().prepare();
+
+        if (!map.getTextureData().isPrepared())
+            map.getTextureData().prepare();
+
         var texturePixmap = texture.getTextureData().consumePixmap();
+        var intermediatePixmap = intermediate.getTextureData().consumePixmap();
+        var mapPixmap = map.getTextureData().consumePixmap();
+
+        var secondStepPixmap = convertToIntermediate(texturePixmap, intermediatePixmap);
+        var finalPixmap = convertToFinal(mapPixmap, secondStepPixmap, parameter != null && parameter.keepAlphaFromSource);
+
+        return new Texture(finalPixmap);
+    }
+
+    private Pixmap convertToIntermediate(Pixmap texturePixmap, Pixmap intermediatePixmap) {
+        var pixmap = new Pixmap(texturePixmap.getWidth(), texturePixmap.getHeight(), texturePixmap.getFormat());
+
+        var tmpPoint = new GridPoint2();
+
+        for (int x = 0; x < texturePixmap.getWidth(); x++) {
+            for (int y = 0; y < texturePixmap.getHeight(); y++) {
+                var color = texturePixmap.getPixel(x, y);
+
+                if (color == 0)
+                    continue;
+
+                var coordinate = findCoordinatesOfColor(intermediatePixmap, color, tmpPoint);
+                if (coordinate == null)
+                    throw new IllegalArgumentException("Couldn't find color " + new Color(color) + " on intermediate map.");
+
+                pixmap.setColor(coordinate.x / 255f, coordinate.y / 255f, 0, 1);
+                pixmap.drawPixel(x, y);
+            }
+        }
+        return pixmap;
+    }
+
+    private GridPoint2 findCoordinatesOfColor(Pixmap pixmap, int color, GridPoint2 tmp) {
+        for (int x = 0; x < pixmap.getWidth(); x++) {
+            for (int y = 0; y < pixmap.getHeight(); y++) {
+                if (pixmap.getPixel(x, y) == color)
+                    return tmp.set(x, y);
+            }
+        }
+
+        return null;
+    }
+
+    private Pixmap convertToFinal(Pixmap mapPixmap, Pixmap texturePixmap, boolean keepAlphaFromSource) {
+        var finalPixmap = new Pixmap(texturePixmap.getWidth(), texturePixmap.getHeight(), texturePixmap.getFormat());
 
         for (int x = 0; x < texturePixmap.getWidth(); x++) {
             for (int y = 0; y < texturePixmap.getHeight(); y++) {
@@ -66,17 +117,14 @@ public class AarthSkinTextureAssetLoader extends AsynchronousAssetLoader<Texture
                 var g = ((mapColor & 0x00ff0000) >>> 16) / 255f;
                 var b = ((mapColor & 0x0000ff00) >>> 8) / 255f;
 
-                var a = ((parameter != null && parameter.keepAlphaFromSource ? color : mapColor) & 0x000000ff) / 255f;
+                var a = ((keepAlphaFromSource ? color : mapColor) & 0x000000ff) / 255f;
 
-                texturePixmap.setColor(r, g, b, a);
-                texturePixmap.drawPixel(x, y);
+                finalPixmap.setColor(r, g, b, a);
+                finalPixmap.drawPixel(x, y);
             }
         }
 
-        texturePixmap.setColor(Color.RED);
-        texturePixmap.drawPixel(1, 6);
-
-        return new Texture(texturePixmap);
+        return finalPixmap;
     }
 
     @Override
@@ -84,11 +132,12 @@ public class AarthSkinTextureAssetLoader extends AsynchronousAssetLoader<Texture
         var descriptors = new Array<AssetDescriptor>();
 
         var content = file.readString().split("\n");
-        if (content.length != 2)
-            throw new GdxRuntimeException(new IllegalArgumentException("Aarth skin file should contain two lines: \nmap\ntexture"));
+        if (content.length != 3)
+            throw new GdxRuntimeException(new IllegalArgumentException("Aarth skin file should contain two lines: \nsource\nintermediate\nmap"));
 
         descriptors.add(new AssetDescriptor<>(resolve(content[0].trim()), Texture.class));
         descriptors.add(new AssetDescriptor<>(resolve(content[1].trim()), Texture.class));
+        descriptors.add(new AssetDescriptor<>(resolve(content[2].trim()), Texture.class));
 
         return descriptors;
     }

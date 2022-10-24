@@ -15,7 +15,7 @@ A libgdx implemented of aartificial's way on loading textures
 
 ![](images/example.png)
 
-| Source file | Map file | Result |
+| Source file | Map files | Result |
 
 # Installation
 

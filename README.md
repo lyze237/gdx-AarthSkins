@@ -9,7 +9,11 @@ A libgdx implemented of aartificial's way on loading textures
 
 # How does this work?
 
+Best to click on this 4-minute video and watch it, that explains everything much better:
+
 [![Youtube Explanation](https://img.youtube.com/vi/HsOKwUwL1bE/0.jpg)](https://www.youtube.com/watch?v=HsOKwUwL1bE)
+
+Here's a simple example file:
 
 ![](images/example.png)
 

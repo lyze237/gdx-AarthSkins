@@ -135,9 +135,9 @@ public class AarthSkinTextureAssetLoader extends AsynchronousAssetLoader<Texture
         if (content.length != 3)
             throw new GdxRuntimeException(new IllegalArgumentException("Aarth skin file should contain two lines: \nsource\nintermediate\nmap"));
 
-        descriptors.add(new AssetDescriptor<>(resolve(content[0].trim()), Texture.class));
-        descriptors.add(new AssetDescriptor<>(resolve(content[1].trim()), Texture.class));
-        descriptors.add(new AssetDescriptor<>(resolve(content[2].trim()), Texture.class));
+        descriptors.add(new AssetDescriptor<>(resolve(content[0].trim()), Texture.class, parameter != null ? parameter.textureParameter : null));
+        descriptors.add(new AssetDescriptor<>(resolve(content[1].trim()), Texture.class, parameter != null ? parameter.textureParameter : null));
+        descriptors.add(new AssetDescriptor<>(resolve(content[2].trim()), Texture.class, parameter != null ? parameter.textureParameter : null));
 
         return descriptors;
     }

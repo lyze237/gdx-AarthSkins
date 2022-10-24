@@ -31,46 +31,48 @@ public abstract class AarthSkinBaseLoader<TFormat, TParameters extends AssetLoad
         return result;
     }
 
-    protected Pixmap convert(Texture texture, Texture intermediate, Texture map) {
+    protected Pixmap convert(Texture texture, Texture map, Texture lookup) {
         if (!texture.getTextureData().isPrepared())
             texture.getTextureData().prepare();
-
-        if (!intermediate.getTextureData().isPrepared())
-            intermediate.getTextureData().prepare();
 
         if (!map.getTextureData().isPrepared())
             map.getTextureData().prepare();
 
-        var texturePixmap = texture.getTextureData().consumePixmap();
-        var intermediatePixmap = intermediate.getTextureData().consumePixmap();
-        var mapPixmap = map.getTextureData().consumePixmap();
-        var secondStepPixmap = convertToIntermediate(texturePixmap, intermediatePixmap);
+        if (!lookup.getTextureData().isPrepared())
+            lookup.getTextureData().prepare();
 
-        return convertToFinal(secondStepPixmap, mapPixmap);
+        var sourcePixmap = texture.getTextureData().consumePixmap();
+        var mapPixmap = map.getTextureData().consumePixmap();
+        var lookupPixmap = lookup.getTextureData().consumePixmap();
+
+        var overlayPixmap = convertToOverlay(sourcePixmap, mapPixmap);
+        var finalPixmap = convertToResult(overlayPixmap, lookupPixmap);
+
+        return finalPixmap;
     }
 
-    protected Pixmap convertToIntermediate(Pixmap texturePixmap, Pixmap intermediatePixmap) {
-        var pixmap = new Pixmap(texturePixmap.getWidth(), texturePixmap.getHeight(), texturePixmap.getFormat());
+    protected Pixmap convertToOverlay(Pixmap source, Pixmap map) {
+        var overlay = new Pixmap(source.getWidth(), source.getHeight(), source.getFormat());
 
         var tmpPoint = new GridPoint2();
 
-        for (int x = 0; x < texturePixmap.getWidth(); x++) {
-            for (int y = 0; y < texturePixmap.getHeight(); y++) {
-                var color = texturePixmap.getPixel(x, y);
+        for (int x = 0; x < source.getWidth(); x++) {
+            for (int y = 0; y < source.getHeight(); y++) {
+                var color = source.getPixel(x, y);
 
                 if (color == 0)
                     continue;
 
-                var coordinate = findCoordinatesOfColor(intermediatePixmap, color, tmpPoint);
+                var coordinate = findCoordinatesOfColor(map, color, tmpPoint);
                 if (coordinate == null)
                     throw new IllegalArgumentException("Couldn't find color " + new Color(color) + " on intermediate map. (" + x + "/" + y + ")");
 
-                pixmap.setColor(coordinate.x / 255f, coordinate.y / 255f, 0, 1);
-                pixmap.drawPixel(x, y);
+                overlay.setColor(coordinate.x / 255f, coordinate.y / 255f, 0, 1);
+                overlay.drawPixel(x, y);
             }
         }
 
-        return pixmap;
+        return overlay;
     }
 
     private GridPoint2 findCoordinatesOfColor(Pixmap pixmap, int color, GridPoint2 tmp) {
@@ -84,12 +86,12 @@ public abstract class AarthSkinBaseLoader<TFormat, TParameters extends AssetLoad
         return null;
     }
 
-    protected Pixmap convertToFinal(Pixmap texturePixmap, Pixmap mapPixmap) {
-        var finalPixmap = new Pixmap(texturePixmap.getWidth(), texturePixmap.getHeight(), texturePixmap.getFormat());
+    protected Pixmap convertToResult(Pixmap source, Pixmap lookup) {
+        var result = new Pixmap(source.getWidth(), source.getHeight(), source.getFormat());
 
-        for (int x = 0; x < texturePixmap.getWidth(); x++) {
-            for (int y = 0; y < texturePixmap.getHeight(); y++) {
-                var color = texturePixmap.getPixel(x, y);
+        for (int x = 0; x < source.getWidth(); x++) {
+            for (int y = 0; y < source.getHeight(); y++) {
+                var color = source.getPixel(x, y);
 
                 if (color == 0)
                     continue;
@@ -97,18 +99,18 @@ public abstract class AarthSkinBaseLoader<TFormat, TParameters extends AssetLoad
                 var xOnMap = (color & 0xff000000) >>> 24; // r
                 var yOnMap = (color & 0x00ff0000) >>> 16; // g
 
-                var mapColor = mapPixmap.getPixel(xOnMap, yOnMap);
+                var mapColor = lookup.getPixel(xOnMap, yOnMap);
 
                 var r = ((mapColor & 0xff000000) >>> 24) / 255f;
                 var g = ((mapColor & 0x00ff0000) >>> 16) / 255f;
                 var b = ((mapColor & 0x0000ff00) >>> 8) / 255f;
                 var a = ((mapColor) & 0x000000ff) / 255f;
 
-                finalPixmap.setColor(r, g, b, a);
-                finalPixmap.drawPixel(x, y);
+                result.setColor(r, g, b, a);
+                result.drawPixel(x, y);
             }
         }
 
-        return finalPixmap;
+        return result;
     }
 }

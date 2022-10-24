@@ -14,7 +14,7 @@ import lombok.Data;
 import lombok.var;
 
 public class AarthSkinTextureLoader extends AarthSkinBaseLoader<Texture, AarthSkinTextureLoader.AarthSkinParameter> {
-    private String textureFile, intermediateFile, mapFile;
+    private String textureFile, mapFile, lookupFile;
 
     public AarthSkinTextureLoader() {
         this(new InternalFileHandleResolver());
@@ -28,22 +28,21 @@ public class AarthSkinTextureLoader extends AarthSkinBaseLoader<Texture, AarthSk
     public void loadAsync(AssetManager manager, String fileName, FileHandle file, AarthSkinParameter parameter) {
         var content = file.readString().split("\n");
         if (content.length != 3)
-            throw new GdxRuntimeException(new IllegalArgumentException("Aarth skin file should contain two lines: \nsource\nintermediate\nmap"));
+            throw new GdxRuntimeException(new IllegalArgumentException("Aarth skin file should contain three lines: \nsource\nmap\nlookup"));
 
         textureFile = getRelativeFileHandle(file, content[0].trim()).path();
-        intermediateFile = getRelativeFileHandle(file, content[1].trim()).path();
-        mapFile = getRelativeFileHandle(file, content[2].trim()).path();
+        mapFile = getRelativeFileHandle(file, content[1].trim()).path();
+        lookupFile = getRelativeFileHandle(file, content[2].trim()).path();
     }
 
     @Override
     public Texture loadSync(AssetManager manager, String fileName, FileHandle file, AarthSkinParameter parameter) {
         var texture = manager.get(textureFile, Texture.class);
         var map = manager.get(mapFile, Texture.class);
-        var intermediate = manager.get(intermediateFile, Texture.class);
+        var lookup = manager.get(lookupFile, Texture.class);
 
-        var finalPixmap = convert(texture, intermediate, map);
-
-        return new Texture(finalPixmap);
+        var result = convert(texture, map, lookup);
+        return new Texture(result);
     }
 
     @Override
@@ -52,17 +51,17 @@ public class AarthSkinTextureLoader extends AarthSkinBaseLoader<Texture, AarthSk
 
         var content = file.readString().split("\n");
         if (content.length != 3)
-            throw new GdxRuntimeException(new IllegalArgumentException("Aarth skin file should contain two lines: \nsource\nintermediate\nmap"));
+            throw new GdxRuntimeException(new IllegalArgumentException("Aarth skin file should contain three lines: \nsource\nmap\nlookup"));
 
-        descriptors.add(new AssetDescriptor<>(getRelativeFileHandle(file, content[0].trim()), Texture.class, parameter != null ? parameter.textureParameter : null));
-        descriptors.add(new AssetDescriptor<>(getRelativeFileHandle(file, content[1].trim()), Texture.class, parameter != null ? parameter.intermediateTextureParameter : null));
-        descriptors.add(new AssetDescriptor<>(getRelativeFileHandle(file, content[2].trim()), Texture.class, parameter != null ? parameter.mapTextureParameter : null));
+        descriptors.add(new AssetDescriptor<>(getRelativeFileHandle(file, content[0].trim()), Texture.class, parameter != null ? parameter.sourceTextureParameter : null));
+        descriptors.add(new AssetDescriptor<>(getRelativeFileHandle(file, content[1].trim()), Texture.class, parameter != null ? parameter.mapTextureParameter : null));
+        descriptors.add(new AssetDescriptor<>(getRelativeFileHandle(file, content[2].trim()), Texture.class, parameter != null ? parameter.lookupTextureParameter : null));
 
         return descriptors;
     }
 
     @Data
     public static class AarthSkinParameter extends AssetLoaderParameters<Texture> {
-        private TextureLoader.TextureParameter textureParameter, intermediateTextureParameter, mapTextureParameter;
+        private TextureLoader.TextureParameter sourceTextureParameter, mapTextureParameter, lookupTextureParameter;
     }
 }

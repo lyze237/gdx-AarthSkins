@@ -17,10 +17,10 @@ A libgdx implemented of aartificial's way on loading textures
 
 # Example
 
-Create a file ending in `.aarth`. (For example: `Test.aarth`) and fill it with the following lines:
-1. path to source file
-2. path to intermediate map file
-3. path to actual map file
+Create a file ending in `.aarth`. (For example: `Test.aarth`) and fill it with the following three lines (All paths should be relative to the `.aarth` file):
+1. relative path to source file
+2. relative path to map file
+3. relative path to lookup file
 
 Examples see here: https://github.com/lyze237/gdx-AarthSkins/tree/main/src/test/resources
 

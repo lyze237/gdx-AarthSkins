@@ -16,8 +16,6 @@ import com.badlogic.gdx.utils.ObjectMap;
 import lombok.Data;
 import lombok.var;
 
-import javax.swing.plaf.TextUI;
-
 public class AarthSkinTextureAtlasLoader extends AarthSkinBaseLoader<TextureAtlas, AarthSkinTextureAtlasLoader.AarthSkinParameter> {
     private String sourceFile, mapFile, lookupFile;
 
